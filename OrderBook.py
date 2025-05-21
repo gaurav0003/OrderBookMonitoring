@@ -97,6 +97,25 @@ with col2:
         st.session_state.monitoring = False
         msg_queue.put("🛑 Stopped monitoring.")
 
+# Live log display section
+logs_displayed = st.session_state.get("logs_displayed", "")
+
+# Use a Streamlit container to update logs continuously
+log_box = st.empty()
+
+# Auto-refresh logic
+if st.session_state.monitoring:
+    while True:
+        try:
+            # Pull messages from thread-safe queue
+            msg = msg_queue.get(timeout=1)
+            logs_displayed += msg + "\n"
+            st.session_state.logs_displayed = logs_displayed
+            log_box.code(logs_displayed, language="text")
+        except queue.Empty:
+            break  # No new messages, skip UI update this time
+
+
 # Show live logs
 logs_displayed = ""
 while True:
